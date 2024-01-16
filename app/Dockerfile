@@ -1,6 +1,12 @@
 # Dockerfile for Application Container
 FROM ubuntu:latest
 
+# Arguments to take host user's UID and GID
+ARG USER_ID
+ARG GROUP_ID
+ARG USER_NAME
+ARG SSHD_PORT
+
 # Avoid prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -27,22 +33,26 @@ RUN echo "X11Forwarding yes" >> /etc/ssh/ssh_config \
     && echo "X11UseLocalhost no" >> /etc/ssh/ssh_config \
     && mkdir /var/run/sshd
 
-# Set up user and groups
-RUN groupadd -g 1000 seanrice \
-    && useradd -m -s /bin/bash -u 1000 -g 1000 seanrice \
-    && usermod -aG sudo seanrice \
-    && echo 'seanrice ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# Create a new group and user with host user's UID, GID, and username
+RUN addgroup --gid $GROUP_ID $USER_NAME
+RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER_NAME
+# Add user to sudoers with NOPASSWD
+RUN echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USER_NAME
+RUN chmod 0440 /etc/sudoers.d/$USER_NAME
 
-WORKDIR /home/seanrice
-USER seanrice
+# Set the working directory
+WORKDIR /home/$USER_NAME
+
+# Switch to the new user
+USER $USER_NAME
 
 RUN ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -q -N ""
-RUN echo "source /opt/ros/humble/setup.bash" >> /home/seanrice/.bashrc
+RUN echo "source /opt/ros/humble/setup.bash" >> /home/$USER_NAME/.bashrc
 
 # Reset user to root
 USER root
 
-RUN echo "Port 2222" >> /etc/ssh/sshd_config
+RUN echo "Port $SSHD_PORT" >> /etc/ssh/sshd_config
 
 # Copy the start script
 COPY start.sh /start.sh

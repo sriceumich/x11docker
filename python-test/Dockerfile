@@ -1,6 +1,11 @@
 # Use an official Python runtime as a parent image
 FROM python:3.8-slim
 
+# Arguments to take host user's UID and GID
+ARG USER_ID
+ARG GROUP_ID
+ARG USER_NAME
+
 # Set the working directory in the container
 WORKDIR /usr/src/app
 

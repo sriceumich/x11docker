@@ -1,6 +1,12 @@
 # Dockerfile for X11 Server Container
 FROM ubuntu:latest
 
+# Arguments to take host user's UID and GID
+ARG USER_ID
+ARG GROUP_ID
+ARG USER_NAME
+ARG SSHD_PORT
+
 # Avoid prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -10,22 +16,19 @@ RUN apt-get update && apt-get install -y xvfb x11-utils ssh
 # Generate SSH host keys
 RUN ssh-keygen -A
 
-# Set up user and groups
-RUN groupadd seanrice -g 1000
-RUN useradd seanrice -m -s /bin/bash -u 1000 -g 1000
-RUN usermod -aG sudo seanrice
-RUN usermod -aG video seanrice
-RUN usermod -aG dialout seanrice
-RUN echo 'seanrice ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# Create a new group and user with host user's UID, GID, and username
+RUN addgroup --gid $GROUP_ID $USER_NAME
+RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER_NAME
+# Add user to sudoers with NOPASSWD
+RUN echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USER_NAME
+RUN chmod 0440 /etc/sudoers.d/$USER_NAME
 
 RUN echo "Port 2220" >> /etc/ssh/sshd_config
 
-WORKDIR /home/seanrice
+WORKDIR /home/$USER_ID
 #USER root
 #RUN echo "allowed_users=anybody" >> /etc/X11/Xwrapper.config
-USER seanrice
-# Set the display environment variable
-ENV DISPLAY=:0
+USER $USER_ID
 
 # Copy the xorg.conf file with dummy driver configuration
 #COPY xorg.conf /etc/X11/xorg.conf

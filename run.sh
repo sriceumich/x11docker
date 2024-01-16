@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define your Docker image names
-X11_SERVER_IMAGE="x11-server-image"
-APP_CONTAINER_IMAGE="app-container-image"
+X11_SERVER_IMAGE="x11-server-image-$(id -u)"
+APP_CONTAINER_IMAGE="app-container-image-$(id -u)"
 
 # Run the X11 server container
 echo "Running X11 Server container..." 
@@ -22,6 +22,6 @@ docker run -e --name app-python-plot -e DISPLAY=:0 $APP_CONTAINER_IMAGE
 docker run  -e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix python-plot
 
 
-#logon
-ssh -X -p 2222 seanrice@wailord.engin.umich.edu
+#logon to server
+ssh -X -p 2222 $(id -u)@wailord.engin.umich.edu
 
