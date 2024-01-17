@@ -2,6 +2,7 @@
 # Overview
 This repository contains Dockerfiles and scripts to set up and run two Docker containers: one acting as an X11 server using Xvfb (X Virtual FrameBuffer), and another as an application container capable of running X11 applications, specifically configured for ROS 2 Humble and rviz. The setup allows for running graphical applications in a Dockerized environment and forwarding their display to a local machine using X11 forwarding over SSH.
 
+
 # Files Description
 Dockerfile: Dockerfile to create the X11 server and application containers.
 start.sh: A script to start the X11 server (Xvfb) and the SSH daemon (sshd) in the container.
@@ -34,7 +35,8 @@ To access the application container, use SSH with X11 forwarding. Replace contai
 
 bash
 
-ssh -X container_username@host_ip_address -p port
+ssh -X -p 2222 $(id -u)@MACHINENAMEHERE.engin.umich.edu
+
 Launch rviz
 
 Inside the container, after setting up the ROS environment, you can start rviz:

@@ -33,5 +33,5 @@ docker run  -e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix python-plot
 
 
 #logon to server
-ssh -X -p 2222 $(id -u)@wailord.engin.umich.edu
+#ssh -X -p 2222 $(id -u)@wailord.engin.umich.edu
 

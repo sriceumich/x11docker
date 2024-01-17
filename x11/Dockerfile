@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y xvfb x11-utils ssh
 # Generate SSH host keys
 RUN ssh-keygen -A
 
+# Create /etc/sudoers.d directory
+RUN mkdir -p /etc/sudoers.d
+
 # Create a new group and user with host user's UID, GID, and username
 RUN addgroup --gid $GROUP_ID $USER_NAME
 RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER_NAME
@@ -24,11 +27,6 @@ RUN echo "$USER_NAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USER_NAME
 RUN chmod 0440 /etc/sudoers.d/$USER_NAME
 
 RUN echo "Port 2220" >> /etc/ssh/sshd_config
-
-WORKDIR /home/$USER_ID
-#USER root
-#RUN echo "allowed_users=anybody" >> /etc/X11/Xwrapper.config
-USER $USER_ID
 
 # Copy the xorg.conf file with dummy driver configuration
 #COPY xorg.conf /etc/X11/xorg.conf
@@ -41,6 +39,11 @@ COPY start.sh /start.sh
 
 # Make the script executable
 RUN chmod +x /start.sh
+
+WORKDIR /home/$USER_ID
+#USER root
+#RUN echo "allowed_users=anybody" >> /etc/X11/Xwrapper.config
+USER $USER_ID
 
 # Run the startup script
 CMD ["/start.sh"]

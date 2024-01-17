@@ -33,6 +33,9 @@ RUN echo "X11Forwarding yes" >> /etc/ssh/ssh_config \
     && echo "X11UseLocalhost no" >> /etc/ssh/ssh_config \
     && mkdir /var/run/sshd
 
+# Create /etc/sudoers.d directory
+RUN mkdir -p /etc/sudoers.d
+
 # Create a new group and user with host user's UID, GID, and username
 RUN addgroup --gid $GROUP_ID $USER_NAME
 RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER_NAME
